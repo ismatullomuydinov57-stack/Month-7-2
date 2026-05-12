@@ -1,0 +1,21 @@
+{% extends 'base.html'%}
+
+{% block contend %}
+ <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for ad in ads %}
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="{{ ad.image.url }}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <a href="{% url 'detail' ad.id %}"> <h5 class="card-title">{{ad.title}}</h5></a>
+                            <p class="card-text">{{ ad.description }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Yaratilgan vaqt:{{ ad.created_at }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+{% endblock contend%}

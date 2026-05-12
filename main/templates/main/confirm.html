@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block contend %}
+<p><b>{{ad.title}}</b> Siz rostan ham bu mahsulotni o'chirmoqchimisiz?</p>
+<form method="post">
+   {%  csrf_token %}
+    <button type="submit" class="btn btn-danger">Ha</button>
+</form>
+<a href="{% url 'detail' ad.id %}" class="btn btn-success">Ortga</a>
+{% endblock contend %}
