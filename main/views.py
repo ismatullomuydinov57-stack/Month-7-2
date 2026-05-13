@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect
 from .forms import AdForm, CommentForm
+from django.contrib.auth.decorators import login_required
 from unicodedata import category
 
 from .models import Category, Advertisement, Comment
@@ -19,10 +20,12 @@ def home(request):
 def ad_detail(request,ad_id):
     categories=Category.objects.all()
     ad=Advertisement.objects.get(pk=ad_id)
+    comments=Comment.objects.filter(ad=ad).order_by('-created')
     context={
         'categories':categories,
         'ad':ad,
-        'form':CommentForm()
+        'form':CommentForm(),
+        'comments':comments
 
     }
     return render(request, 'main/detail.html', context)
@@ -74,6 +77,47 @@ def delete_ad(request:HttpRequest, ad_id:int):
         'ad':ad
     }
     return render(request, 'main/confirm.html', contwxt)
+
+@login_required(login_url='home')
+def save_comment(request:HttpRequest, ad_id:int):
+    ad=Advertisement.objects.get(id=ad_id)
+    if request.method=="POST":
+        form=CommentForm(data=request.POST)
+        if form.is_valid():
+            comment=form.save(commit=False)
+            comment.ad=ad
+            comment.user=request.user
+            comment.save()
+    return redirect('detail', ad_id=ad.pk)
+
+@login_required(login_url='home')
+def update_comment(request:HttpRequest, ad_id:int, comment_id:int):
+    comment=Comment.objects.get(id=comment_id, ad_id=ad_id)
+    context={}
+    if request.user == comment.user:
+        if request.method == 'POST':
+            form = CommentForm(data=request.POST, instance=comment)
+            if form.is_valid():
+                form.save()
+                return redirect('detail', ad_id=ad_id)
+        context['form']=CommentForm(instance=comment)
+
+    return render(request, 'main/update_comment.html', context)
+
+@login_required(login_url='home')
+def delete_comment(request, comment_id:int):
+    comment=Comment.objects.get(pk=comment_id)
+    if comment.user == request.user or request.user.is_superuser:
+        if request.method =='POST':
+            ad_id=comment.ad.pk
+            comment.delete('detail', ad_id=ad_id)
+            return redirect('')
+        return render(request, 'main/confirm_delete_comment.html', )
+    else:
+        return redirect('home')
+
+
+
 
 
 

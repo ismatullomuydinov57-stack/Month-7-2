@@ -27,12 +27,34 @@
                            <h6> <small class="text-muted">Mahsulot narxi:{{ ad.price }} so'm</small></h6>
                         </div>
                         <div class="card-body">
-                            <form method="post">
+                            <form method="post" action="{% url 'save_comment' ad.id %}">
                                 {% csrf_token %}
                                 {{form.as_p}}
                                 <button class="btn btn-primary">Save</button>
                             </form>
+                        </div>
+                        <div class="card-body">
+                            {% for comment in comments %}
+                               <div class="d-flex justify-content-between">
+                                   <div>
+                                       <p style="font-size:8px">User: {{comment.user.username}}</p>
+                                       <p>{{comment.text}}</p>
+                                       <p style="font-size:8px">{{comment.created}}</p>
+                                       <hr>
+                                   </div>
+                                   <div>
+                                       {% if request.user == comment.user %}
+                                       <a href="{% url 'update_comment' ad.pk comment.pk %}">✍️</a>&nbsp;&nbsp;&nbsp;
+                                        {% endif%}
 
+
+                                       {% if request.user == comment.user or request.user.is_superuser %}
+                                       <a href="{% url 'delete_comment' comment.pk%}">🗑</a>
+                                       {%endif%}
+
+                                   </div>
+                               </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
