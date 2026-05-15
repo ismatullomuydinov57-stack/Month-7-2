@@ -42,6 +42,12 @@ class Comment(models.Model):
     def __repr__(self):
         return f"Name: {self.text} Pk: {self.pk}"
 
+class AdLike(models.Model):
+    ad=models.ForeignKey(Advertisement, on_delete=models.CASCADE)
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.ad.name
 
 
 

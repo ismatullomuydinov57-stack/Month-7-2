@@ -4,13 +4,17 @@ from .forms import AdForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from unicodedata import category
 
-from .models import Category, Advertisement, Comment
+from .models import Category, Advertisement, Comment, AdLike
+
 
 # Create your views here.
 
 def home(request):
     categories=Category.objects.all()
     ads=Advertisement.objects.all()
+    for ad in ads:
+        if ad.adlike_set.filter(user=request.user):
+            ad.like=True
     context={
         'categories':categories,
         'ads':ads
@@ -110,11 +114,18 @@ def delete_comment(request, comment_id:int):
     if comment.user == request.user or request.user.is_superuser:
         if request.method =='POST':
             ad_id=comment.ad.pk
-            comment.delete('detail', ad_id=ad_id)
+            comment.delete('detail', ad_id)
             return redirect('')
         return render(request, 'main/confirm_delete_comment.html', )
     else:
         return redirect('home')
+
+@login_required(login_url='home')
+def add_like_for_ad(request, ad_id:int):
+    ad_like, created=AdLike.objects.get_or_create(ad_id=ad_id, user=request.user)
+    if not created:
+        ad_like.delete()
+    return redirect('home')
 
 
 
